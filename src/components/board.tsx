@@ -93,6 +93,129 @@ export default function Board(){
                 }
 
                 setMoves(num);
+            }else if(square[i][j] == "♝" || square[i][j] =="♗"){
+                let num :[number,number][] = [];
+
+                let x = i+1;
+                let y = j+1;
+
+                while(x < 8 && y<8){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x++;
+                    y++;
+                }
+                
+                x = i+1;
+                y = j-1;
+                while(x < 8 && y>0){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x++;
+                    y--;
+                }
+
+                x = i-1;
+                y = j+1;
+                while(x > 0 && y<8){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x--;
+                    y++;
+                }
+
+                x = i-1;
+                y = j-1;
+                while(x > 0 && y>0){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x--;
+                    y--;
+                }
+
+                setMoves(num);
+            }else if(square[i][j] == "♛" || square[i][j] =="♕"){
+                let num :[number,number][] = [];
+
+                let x = i+1;
+                let y = j+1;
+
+                while(x <= 8){
+                    if(square[x][j] != "") break;
+                    num.push([x,j]);
+                    x++;
+                }
+                
+                x = i-1;
+                while(x >= 0){
+                    if(square[x][j] != "") break;
+                    num.push([x,j]);
+                    x--;
+                }
+
+                while(y <= 8){
+                    if(square[i][y] != "") break;
+                    num.push([i,y]);
+                    y++;
+                }
+
+                y = j-1;
+                while(y >= 0 ){
+                    if(square[i][y] != "") break;
+                    num.push([i,y]);
+                    y--;
+                }
+
+                x = i+1;
+                y = j+1;
+
+                while(x < 8 && y<8){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x++;
+                    y++;
+                }
+                
+                x = i+1;
+                y = j-1;
+                while(x < 8 && y>0){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x++;
+                    y--;
+                }
+
+                x = i-1;
+                y = j+1;
+                while(x > 0 && y<8){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x--;
+                    y++;
+                }
+
+                x = i-1;
+                y = j-1;
+                while(x > 0 && y>0){
+                    if(square[x][y] != "") break;
+                    num.push([x,y])
+                    x--;
+                    y--;
+                }
+
+                setMoves(num);
+            }else if(square[i][j] == "♔" || square[i][j] =="♚"){
+                let num : [number, number][] = []
+                if(square[i+1][j+1] == "") num.push([i+1,j+1])
+                if(square[i+1][j] == "") num.push([i+1,j])
+                if(square[i+1][j-1] == "") num.push([i+1,j-1])
+                if(square[i][j+1] == "") num.push([i,j+1])
+                if(square[i][j-1] == "") num.push([i,j-1])
+                if(square[i-1][j-1] == "") num.push([i-1,j-1])
+                if(square[i-1][j] == "") num.push([i-1,j])
+                if(square[i-1][j+1] == "") num.push([i-1,j+1])  
+
+                setMoves(num);
             }
         }
     
