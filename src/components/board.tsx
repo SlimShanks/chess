@@ -46,6 +46,53 @@ export default function Board(){
                     num.push([temp,j]);
                 }
                 setMoves(num)
+            }else if(square[i][j] == "♘"){
+                let num: [number,number][] = [];
+
+                num.push([i-2,j+1]);
+                num.push([i-2,j-1]);
+
+                setMoves(num);
+            }else if(square[i][j] == "♞"){
+                let num: [number,number][] = [];
+
+                num.push([i+2,j+1]);
+                num.push([i+2,j-1]);
+
+                setMoves(num);
+            }else if(square[i][j] == "♜" || square[i][j] == "♖"){
+                let num :[number,number][] = [];
+
+                let x = i+1;
+                let y = j+1;
+
+                while(x <= 8){
+                    if(square[x][j] != "") break;
+                    num.push([x,j]);
+                    x++;
+                }
+                
+                x = i-1;
+                while(x >= 0){
+                    if(square[x][j] != "") break;
+                    num.push([x,j]);
+                    x--;
+                }
+
+                while(y <= 8){
+                    if(square[i][y] != "") break;
+                    num.push([i,y]);
+                    y++;
+                }
+
+                y = j-1;
+                while(y >= 0 ){
+                    if(square[i][y] != "") break;
+                    num.push([i,y]);
+                    y--;
+                }
+
+                setMoves(num);
             }
         }
     
