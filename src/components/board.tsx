@@ -1,3 +1,4 @@
+
 // import { ChessQueen } from 'lucide-react';
 import { useState} from "react";
 
@@ -21,6 +22,21 @@ export default function Board(){
     const [moves, setMoves] = useState<[number, number][]>([]);
 
     function handleClick(i : number, j : number){
+        if(active && moves.length > 0){
+            
+
+            if(moves.some(([x,y]) => ( x == i && y == j))){
+                
+                let start = active[0]
+                let end = active[1]
+
+                square[i][j] = square[start][end]
+                square[start][end]=""
+
+                setSquare(square)
+            }
+            
+        }
         setMoves([])
         if(active && active[0] == i && active[1] == j){
             setMoves([])
@@ -66,7 +82,7 @@ export default function Board(){
                 let x = i+1;
                 let y = j+1;
 
-                while(x <= 8){
+                while(x < 8){
                     if(square[x][j] != "") break;
                     num.push([x,j]);
                     x++;
@@ -79,7 +95,7 @@ export default function Board(){
                     x--;
                 }
 
-                while(y <= 8){
+                while(y < 8){
                     if(square[i][y] != "") break;
                     num.push([i,y]);
                     y++;
@@ -108,7 +124,7 @@ export default function Board(){
                 
                 x = i+1;
                 y = j-1;
-                while(x < 8 && y>0){
+                while(x < 8 && y>=0){
                     if(square[x][y] != "") break;
                     num.push([x,y])
                     x++;
@@ -117,7 +133,7 @@ export default function Board(){
 
                 x = i-1;
                 y = j+1;
-                while(x > 0 && y<8){
+                while(x >= 0 && y<8){
                     if(square[x][y] != "") break;
                     num.push([x,y])
                     x--;
@@ -126,7 +142,7 @@ export default function Board(){
 
                 x = i-1;
                 y = j-1;
-                while(x > 0 && y>0){
+                while(x >= 0 && y>=0){
                     if(square[x][y] != "") break;
                     num.push([x,y])
                     x--;
@@ -140,7 +156,7 @@ export default function Board(){
                 let x = i+1;
                 let y = j+1;
 
-                while(x <= 8){
+                while(x < 8){
                     if(square[x][j] != "") break;
                     num.push([x,j]);
                     x++;
@@ -153,7 +169,7 @@ export default function Board(){
                     x--;
                 }
 
-                while(y <= 8){
+                while(y < 8){
                     if(square[i][y] != "") break;
                     num.push([i,y]);
                     y++;
@@ -178,7 +194,7 @@ export default function Board(){
                 
                 x = i+1;
                 y = j-1;
-                while(x < 8 && y>0){
+                while(x < 8 && y>=0){
                     if(square[x][y] != "") break;
                     num.push([x,y])
                     x++;
@@ -187,7 +203,7 @@ export default function Board(){
 
                 x = i-1;
                 y = j+1;
-                while(x > 0 && y<8){
+                while(x >= 0 && y<8){
                     if(square[x][y] != "") break;
                     num.push([x,y])
                     x--;
@@ -196,7 +212,7 @@ export default function Board(){
 
                 x = i-1;
                 y = j-1;
-                while(x > 0 && y>0){
+                while(x >= 0 && y>=0){
                     if(square[x][y] != "") break;
                     num.push([x,y])
                     x--;
@@ -205,15 +221,26 @@ export default function Board(){
 
                 setMoves(num);
             }else if(square[i][j] == "♔" || square[i][j] =="♚"){
-                let num : [number, number][] = []
-                if(square[i+1][j+1] == "") num.push([i+1,j+1])
-                if(square[i+1][j] == "") num.push([i+1,j])
-                if(square[i+1][j-1] == "") num.push([i+1,j-1])
-                if(square[i][j+1] == "") num.push([i,j+1])
-                if(square[i][j-1] == "") num.push([i,j-1])
-                if(square[i-1][j-1] == "") num.push([i-1,j-1])
-                if(square[i-1][j] == "") num.push([i-1,j])
-                if(square[i-1][j+1] == "") num.push([i-1,j+1])  
+                const directions = [
+                    [-1, -1], [-1, 0], [-1, 1],
+                    [0, -1],           [0, 1],
+                    [1, -1],  [1, 0],  [1, 1]
+                ];
+
+                let num: [number, number][] = [];
+
+                for (const [di, dj] of directions) {
+                    const ni = i + di;
+                    const nj = j + dj;
+
+                    if (
+                        ni >= 0 && ni < 8 &&
+                        nj >= 0 && nj < 8 &&
+                        square[ni][nj] === ""
+                    ) {
+                        num.push([ni, nj]);
+                    }
+                }
 
                 setMoves(num);
             }
@@ -244,5 +271,3 @@ export default function Board(){
         </div>
     )
 }
-
-
