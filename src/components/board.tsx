@@ -6,6 +6,9 @@ import { useState} from "react";
 
 export default function Board(){
 
+    const [turn, setTurn] = useState(1);
+    //1 for white
+    //0 for black
     const squares = [
         ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
         ["♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"],
@@ -21,21 +24,50 @@ export default function Board(){
     const [active,setActive] = useState<[number, number] | null>(null);
     const [moves, setMoves] = useState<[number, number][]>([]);
 
-    function handleClick(i : number, j : number){
-        if(active && moves.length > 0){
+    function handleClick(i : number, j : number, colour : number){
+        // console.log(colour)
+        // if(colour == turn) console.log("Fk")
+        // if(active && moves.length > 0 && turn == colour){
+        //     console.log("invoked")
             
-
-            if(moves.some(([x,y]) => ( x == i && y == j))){
+        //     if(moves.some(([x,y]) => ( x == i && y == j))){
                 
-                let start = active[0]
-                let end = active[1]
+        //         let start = active[0]
+        //         let end = active[1]
 
-                square[i][j] = square[start][end]
-                square[start][end]=""
+        //         square[i][j] = square[start][end]
+        //         square[start][end]=""
 
-                setSquare(square)
-            }
+        //         setSquare(square)
+        //     }
             
+        // }
+
+                    // We already have a selected piece
+        if (active && moves.length > 0) {
+
+            // Is this square a valid destination?
+            if (moves.some(([x, y]) => x === i && y === j)) {
+
+                let start = active[0];
+                let end = active[1];
+
+                square[i][j] = square[start][end];
+                square[start][end] = "";
+
+                setSquare(square);
+
+                setMoves([]);
+                setActive(null);
+
+                setTurn(turn === 1 ? 0 : 1);
+                return;
+            }
+        }
+
+        // No piece selected yet
+        if (colour !== turn) {
+            return;
         }
         setMoves([])
         if(active && active[0] == i && active[1] == j){
@@ -62,7 +94,7 @@ export default function Board(){
                     num.push([temp,j]);
                 }
                 setMoves(num)
-            }else if(square[i][j] == "♘"){
+            }    else if(square[i][j] == "♘"){
                 let num: [number,number][] = [];
 
                 num.push([i-2,j+1]);
@@ -248,6 +280,10 @@ export default function Board(){
     
         
     }
+
+    function color(piece : string){
+        return ["♖","♘" ,"♗" ,"♕" ,"♔" ,"♙"].includes(piece) ? 1: 0;
+    } 
     return(
         <div>
             <h2 className="text-2xl">
@@ -255,9 +291,9 @@ export default function Board(){
             </h2>
         
             {square.map((_,i) => (
-                <div className=" flex flex-row">{squares.map((_,j) => (
+                <div key={i} className=" flex flex-row">{square.map((_,j) => (
                     <div key = {`${i}-${j}`} 
-                        onClick={()=>handleClick(i,j)} 
+                        onClick={()=>handleClick(i,j, color(square[i][j]))} 
                         className= {`${active && active[0] == i && active[1] == j  ? "bg-purple-600" : ""} 
                                     ${active &&  moves.some(([x, y]) => x === i && y === j) ? "bg-purple-600" : ""}
                                     ${(i+j)%2 != 0 ? "bg-green-800" : ""} 
@@ -271,3 +307,7 @@ export default function Board(){
         </div>
     )
 }
+
+/*
+
+*/
