@@ -6,6 +6,11 @@ import { useState} from "react";
 
 export default function Board(){
 
+    function playSound(){
+        const sound = new Audio('/src/assets/sound/move.mp3');
+        sound.play();
+    }
+
     const [turn, setTurn] = useState(1);
     //1 for white
     //0 for black
@@ -25,8 +30,8 @@ export default function Board(){
     const [moves, setMoves] = useState<[number, number][]>([]);
 
     function handleClick(i : number, j : number, colour : number){
-        // console.log(colour)
-        // if(colour == turn) console.log("Fk")
+  
+
         // if(active && moves.length > 0 && turn == colour){
         //     console.log("invoked")
             
@@ -48,7 +53,7 @@ export default function Board(){
 
             // Is this square a valid destination?
             if (moves.some(([x, y]) => x === i && y === j)) {
-
+                playSound();
                 let start = active[0];
                 let end = active[1];
 
@@ -78,7 +83,8 @@ export default function Board(){
             setActive(null)
             setMoves([])
         }else{
-            setActive([i,j])           
+            setActive([i,j])     
+
 
             if(square[i][j] == "♙"){
                 let num: [number, number][] = [];
@@ -296,7 +302,7 @@ export default function Board(){
                         onClick={()=>handleClick(i,j, color(square[i][j]))} 
                         className= {`${active && active[0] == i && active[1] == j  ? "bg-purple-600" : ""} 
                                     ${active &&  moves.some(([x, y]) => x === i && y === j) ? "bg-purple-600" : ""}
-                                    ${(i+j)%2 != 0 ? "bg-green-800" : ""} 
+                                    ${(i+j)%2 != 0 ? "bg-green-300" : ""} 
                                     border border-black h-16 w-16`}>
                         {square[i][j]}
                     </div>
