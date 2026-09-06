@@ -30,23 +30,6 @@ export default function Board(){
     const [moves, setMoves] = useState<[number, number][]>([]);
 
     function handleClick(i : number, j : number, colour : number){
-  
-
-        // if(active && moves.length > 0 && turn == colour){
-        //     console.log("invoked")
-            
-        //     if(moves.some(([x,y]) => ( x == i && y == j))){
-                
-        //         let start = active[0]
-        //         let end = active[1]
-
-        //         square[i][j] = square[start][end]
-        //         square[start][end]=""
-
-        //         setSquare(square)
-        //     }
-            
-        // }
 
                     // We already have a selected piece
         if (active && moves.length > 0) {
@@ -88,33 +71,111 @@ export default function Board(){
 
             if(square[i][j] == "♙"){
                 let num: [number, number][] = [];
-                for(let val =1; val <= 2; val++){
-                    let temp = i-val;
-                    num.push([temp,j]);
+                if(i == 6){
+                    for(let val =1; val <= 2; val++){
+                        let temp = i-val;
+                        if(square[i-val][j] == ""){
+                            num.push([temp,j]);   
+                        }else{
+                            break;
+                        }
+                    }
+                    setMoves(num)
+                }else{
+                    let temp = i-1;
+                    if(square[i-1][j] == ""){
+                        num.push([temp,j]);
+                    }
+
+                    if(square[i-1][j+1] != "" && 1 != isWhite(square[i-1][j+1])){
+                            num.push([temp,j+1]);   
+                    }
+
+                    if(square[i-1][j-1] != "" && 1 != isWhite(square[i-1][j-1])){
+                            num.push([temp,j-1]);   
+                    }
+                    
+                    setMoves(num)
                 }
-                setMoves(num)
+                
             }else if(square[i][j] == "♟"){
                 let num: [number, number][] = [];
-                for(let val =1; val <= 2; val++){
-                    let temp = i+val;
-                    num.push([temp,j]);
+
+                // Forward movement
+                if(i + 1 < 8 && square[i+1][j] == ""){
+                    num.push([i+1, j]);
+
+                    // Two-square initial move
+                    if(i == 1 && square[i+2][j] == ""){
+                        num.push([i+2, j]);
+                    }
                 }
-                setMoves(num)
+
+                // Capture right
+                if(i + 1 < 8 &&
+                j + 1 < 8 &&
+                square[i+1][j+1] != "" &&
+                isWhite(square[i+1][j+1]) == 1){
+                    num.push([i+1, j+1]);
+                }
+
+                // Capture left
+                if(i + 1 < 8 &&
+                j - 1 >= 0 &&
+                square[i+1][j-1] != "" &&
+                isWhite(square[i+1][j-1]) == 1){
+
+                    num.push([i+1, j-1]);
+                }
+
+                setMoves(num);
             }    else if(square[i][j] == "♘"){
-                let num: [number,number][] = [];
+                    let num: [number, number][] = [];
 
-                num.push([i-2,j+1]);
-                num.push([i-2,j-1]);
+                    let moves = [
+                        [-2, 1], [-2, -1],
+                        [2, 1],  [2, -1],
+                        [-1, 2], [-1, -2],
+                        [1, 2],  [1, -2]
+                    ];
 
-                setMoves(num);
-            }else if(square[i][j] == "♞"){
-                let num: [number,number][] = [];
+                    for(let [di, dj] of moves){
+                        let ni = i + di;
+                        let nj = j + dj;
 
-                num.push([i+2,j+1]);
-                num.push([i+2,j-1]);
+                        if(ni >= 0 && ni < 8 && nj >= 0 && nj < 8){
+                            if(square[ni][nj] == "" || isWhite(square[ni][nj]) != 1){
+                                num.push([ni, nj]);
+                            }
+                        }
+                    }
 
-                setMoves(num);
-            }else if(square[i][j] == "♜" || square[i][j] == "♖"){
+                    setMoves(num);
+                }else if(square[i][j] == "♞"){
+                    let num: [number, number][] = [];
+
+                    let moves = [
+                        [-2, 1], [-2, -1],
+                        [2, 1],  [2, -1],
+                        [-1, 2], [-1, -2],
+                        [1, 2],  [1, -2]
+                    ];
+
+                    for(let [di, dj] of moves){
+                        let ni = i + di;
+                        let nj = j + dj;
+
+                        if(ni >= 0 && ni < 8 && nj >= 0 && nj < 8){
+
+                            // Empty square OR white piece
+                            if(square[ni][nj] == "" || isWhite(square[ni][nj]) == 1){
+                                num.push([ni, nj]);
+                            }
+                        }
+                    }
+
+                    setMoves(num);
+                }else if(square[i][j] == "♜" || square[i][j] == "♖"){
                 let num :[number,number][] = [];
 
                 let x = i+1;
@@ -287,7 +348,7 @@ export default function Board(){
         
     }
 
-    function color(piece : string){
+    function isWhite(piece : string){
         return ["♖","♘" ,"♗" ,"♕" ,"♔" ,"♙"].includes(piece) ? 1: 0;
     } 
     return(
@@ -299,7 +360,7 @@ export default function Board(){
             {square.map((_,i) => (
                 <div key={i} className=" flex flex-row">{square.map((_,j) => (
                     <div key = {`${i}-${j}`} 
-                        onClick={()=>handleClick(i,j, color(square[i][j]))} 
+                        onClick={()=>handleClick(i,j, isWhite(square[i][j]))} 
                         className= {`${active && active[0] == i && active[1] == j  ? "bg-purple-600" : ""} 
                                     ${active &&  moves.some(([x, y]) => x === i && y === j) ? "bg-purple-600" : ""}
                                     ${(i+j)%2 != 0 ? "bg-green-300" : ""} 
@@ -313,7 +374,3 @@ export default function Board(){
         </div>
     )
 }
-
-/*
-
-*/
