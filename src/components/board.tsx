@@ -182,27 +182,38 @@ export default function Board(){
                 let y = j+1;
 
                 while(x < 8){
-                    if(square[x][j] != "") break;
+                    if(square[x][j] != "") {
+                        if(turn != isWhite(square[x][j])) num.push([x,j]);
+                        break;
+                    }
                     num.push([x,j]);
                     x++;
                 }
                 
                 x = i-1;
                 while(x >= 0){
-                    if(square[x][j] != "") break;
+                    if(square[x][j] != "") {
+                        if(turn != isWhite(square[x][j])) num.push([x,j]);
+                        break;
+                    }
                     num.push([x,j]);
                     x--;
                 }
 
                 while(y < 8){
-                    if(square[i][y] != "") break;
+                    if(square[i][y] != "") {
+                        if(turn != isWhite(square[i][y])) num.push([i,y]);
+                        break;}
                     num.push([i,y]);
                     y++;
                 }
 
                 y = j-1;
                 while(y >= 0 ){
-                    if(square[i][y] != "") break;
+                    if(square[i][y] != "") {
+                        if(turn != isWhite(square[i][y])) num.push([i,y]);
+                        break;
+                    }
                     num.push([i,y]);
                     y--;
                 }
@@ -215,7 +226,10 @@ export default function Board(){
                 let y = j+1;
 
                 while(x < 8 && y<8){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x++;
                     y++;
@@ -224,7 +238,10 @@ export default function Board(){
                 x = i+1;
                 y = j-1;
                 while(x < 8 && y>=0){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x++;
                     y--;
@@ -233,7 +250,10 @@ export default function Board(){
                 x = i-1;
                 y = j+1;
                 while(x >= 0 && y<8){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x--;
                     y++;
@@ -242,7 +262,10 @@ export default function Board(){
                 x = i-1;
                 y = j-1;
                 while(x >= 0 && y>=0){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x--;
                     y--;
@@ -256,27 +279,38 @@ export default function Board(){
                 let y = j+1;
 
                 while(x < 8){
-                    if(square[x][j] != "") break;
+                    if(square[x][j] != "") {
+                        if(turn != isWhite(square[x][j])) num.push([x,j]);
+                        break;
+                    }
                     num.push([x,j]);
                     x++;
                 }
                 
                 x = i-1;
                 while(x >= 0){
-                    if(square[x][j] != "") break;
+                    if(square[x][j] != "") {
+                        if(turn != isWhite(square[x][j])) num.push([x,j]);
+                        break;
+                    }
                     num.push([x,j]);
                     x--;
                 }
 
                 while(y < 8){
-                    if(square[i][y] != "") break;
+                    if(square[i][y] != "") {
+                        if(turn != isWhite(square[i][y])) num.push([i,y]);
+                        break;}
                     num.push([i,y]);
                     y++;
                 }
 
                 y = j-1;
                 while(y >= 0 ){
-                    if(square[i][y] != "") break;
+                    if(square[i][y] != "") {
+                        if(turn != isWhite(square[i][y])) num.push([i,y]);
+                        break;
+                    }
                     num.push([i,y]);
                     y--;
                 }
@@ -285,7 +319,10 @@ export default function Board(){
                 y = j+1;
 
                 while(x < 8 && y<8){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x++;
                     y++;
@@ -294,7 +331,10 @@ export default function Board(){
                 x = i+1;
                 y = j-1;
                 while(x < 8 && y>=0){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x++;
                     y--;
@@ -303,7 +343,10 @@ export default function Board(){
                 x = i-1;
                 y = j+1;
                 while(x >= 0 && y<8){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x--;
                     y++;
@@ -312,7 +355,10 @@ export default function Board(){
                 x = i-1;
                 y = j-1;
                 while(x >= 0 && y>=0){
-                    if(square[x][y] != "") break;
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
                     num.push([x,y])
                     x--;
                     y--;
