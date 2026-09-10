@@ -6,6 +6,9 @@ import { useState} from "react";
 
 export default function Board(){
 
+    const [pop, setPop] = useState(false);
+    const [a, setA] = useState<number>();
+
     function playSound(){
         const sound = new Audio('/src/assets/sound/move.mp3');
         sound.play();
@@ -39,9 +42,25 @@ export default function Board(){
                 playSound();
                 let start = active[0];
                 let end = active[1];
-
-                square[i][j] = square[start][end];
-                square[start][end] = "";
+                
+                if(square[i][j] == "♙" && i==0){
+                    setPop(true);
+                    if(a == 1){
+                        square[i][j] = "♘";
+                    }else if(a == 2){
+                        square[i][j] = "♗";
+                    }else if(a == 3){
+                        square[i][j] = "♕";
+                    }else{
+                        square[i][j] = "♖";
+                    }
+                    square[start][end] = "";
+                }else{
+                    
+                    square[i][j] = square[start][end];
+                    square[start][end] = "";
+                }
+                
 
                 setSquare(square);
 
@@ -416,6 +435,21 @@ export default function Board(){
                 ))}
                 </div>
             ))}
+
+            <div>
+            {pop && (
+                <div onClick={() => (setPop(false))}  
+                     className="fixed inset-0 flex justify-center items-center ">
+                        <div className="border border-black backdrop-blur-sm flex flex-row">
+                            <div onClick={()=>(setA(1))} className="w-16 h-16 border border-black">♘</div>
+                            <div onClick={()=>(setA(2))} className="w-16 h-16 border border-black">♗</div>
+                            <div onClick={()=>(setA(3))} className="w-16 h-16 border border-black">♕</div>
+                            <div onClick={()=>(setA(4))} className="w-16 h-16 border border-black">♖</div>
+                        </div>
+
+                </div>
+            )}
+        </div>
 
         </div>
     )
