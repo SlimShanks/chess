@@ -7,12 +7,27 @@ import { useState} from "react";
 export default function Board(){
 
     const [pop, setPop] = useState(false);
-    const [a, setA] = useState<number>();
 
     function playSound(){
         const sound = new Audio('/src/assets/sound/move.mp3');
         sound.play();
     }
+
+    function choosePromotion(pieceWhite: string, pieceBlack: string) {
+        if (!promoSquare) return;
+        const [i, j] = promoSquare;
+
+        const moverWasWhite = square[i][j] === "♙";
+        const chosenPiece = moverWasWhite ? pieceWhite : pieceBlack;
+
+        square[i][j] = chosenPiece;
+        setSquare(square);
+
+        setPop(false);
+        setPromoSquare(null);
+        setTurn(turn === 1 ? 0 : 1);
+    }
+
 
     const [turn, setTurn] = useState(1);
     //1 for white
@@ -31,41 +46,33 @@ export default function Board(){
     const [square, setSquare]= useState(squares);
     const [active,setActive] = useState<[number, number] | null>(null);
     const [moves, setMoves] = useState<[number, number][]>([]);
+    const [promoSquare, setPromoSquare] = useState<[number, number] | null>(null);
 
     function handleClick(i : number, j : number, colour : number){
 
                     // We already have a selected piece
         if (active && moves.length > 0) {
-
-            // Is this square a valid destination?
             if (moves.some(([x, y]) => x === i && y === j)) {
                 playSound();
-                let start = active[0];
-                let end = active[1];
-                
-                if(square[i][j] == "♙" && i==0){
-                    setPop(true);
-                    if(a == 1){
-                        square[i][j] = "♘";
-                    }else if(a == 2){
-                        square[i][j] = "♗";
-                    }else if(a == 3){
-                        square[i][j] = "♕";
-                    }else{
-                        square[i][j] = "♖";
-                    }
-                    square[start][end] = "";
-                }else{
-                    
-                    square[i][j] = square[start][end];
-                    square[start][end] = "";
-                }
-                
+                const [start, end] = active;
+                const movingPiece = square[start][end];
 
+                square[i][j] = movingPiece;
+                square[start][end] = "";
                 setSquare(square);
 
                 setMoves([]);
                 setActive(null);
+
+                const isPromotion =
+                    (movingPiece === "♙" && i === 0) ||
+                    (movingPiece === "♟" && i === 7);
+
+                if (isPromotion) {
+                    setPromoSquare([i, j]);
+                    setPop(true);
+                    return; // don't switch turn yet
+                }
 
                 setTurn(turn === 1 ? 0 : 1);
                 return;
@@ -148,7 +155,7 @@ export default function Board(){
                 }
 
                 setMoves(num);
-            }    else if(square[i][j] == "♘"){
+            }       else if(square[i][j] == "♘"){
                     let num: [number, number][] = [];
 
                     let moves = [
@@ -416,41 +423,37 @@ export default function Board(){
     function isWhite(piece : string){
         return ["♖","♘" ,"♗" ,"♕" ,"♔" ,"♙"].includes(piece) ? 1: 0;
     } 
-    return(
+    return (
         <div>
-            <h2 className="text-2xl">
-                Chess
-            </h2>
-        
-            {square.map((_,i) => (
-                <div key={i} className=" flex flex-row">{square.map((_,j) => (
-                    <div key = {`${i}-${j}`} 
-                        onClick={()=>handleClick(i,j, isWhite(square[i][j]))} 
-                        className= {`${active && active[0] == i && active[1] == j  ? "bg-purple-600" : ""} 
-                                    ${active &&  moves.some(([x, y]) => x === i && y === j) ? "bg-purple-600" : ""}
-                                    ${(i+j)%2 != 0 ? "bg-green-300" : ""} 
-                                    border border-black h-16 w-16`}>
-                        {square[i][j]}
-                    </div>
-                ))}
+            <h2 className="text-2xl">Chess</h2>
+
+            {square.map((_, i) => (
+                <div key={i} className="flex flex-row">
+                    {square.map((_, j) => (
+                        <div
+                            key={`${i}-${j}`}
+                            onClick={() => handleClick(i, j, isWhite(square[i][j]))}
+                            className={`${active && active[0] === i && active[1] === j ? "bg-purple-600" : ""} 
+                                        ${moves.some(([x, y]) => x === i && y === j) ? "bg-purple-600" : ""}
+                                        ${(i + j) % 2 !== 0 ? "bg-green-300" : ""} 
+                                        border border-black h-16 w-16`}
+                        >
+                            {square[i][j]}
+                        </div>
+                    ))}
                 </div>
             ))}
 
-            <div>
             {pop && (
-                <div onClick={() => (setPop(false))}  
-                     className="fixed inset-0 flex justify-center items-center ">
-                        <div className="border border-black backdrop-blur-sm flex flex-row">
-                            <div onClick={()=>(setA(1))} className="w-16 h-16 border border-black">♘</div>
-                            <div onClick={()=>(setA(2))} className="w-16 h-16 border border-black">♗</div>
-                            <div onClick={()=>(setA(3))} className="w-16 h-16 border border-black">♕</div>
-                            <div onClick={()=>(setA(4))} className="w-16 h-16 border border-black">♖</div>
-                        </div>
-
+                <div className="fixed inset-0 flex justify-center items-center">
+                    <div className="border border-black backdrop-blur-sm flex flex-row">
+                        <div onClick={() => choosePromotion("♘", "♞")} className="w-16 h-16 border border-black">♘</div>
+                        <div onClick={() => choosePromotion("♗", "♝")} className="w-16 h-16 border border-black">♗</div>
+                        <div onClick={() => choosePromotion("♕", "♛")} className="w-16 h-16 border border-black">♕</div>
+                        <div onClick={() => choosePromotion("♖", "♜")} className="w-16 h-16 border border-black">♖</div>
+                    </div>
                 </div>
             )}
         </div>
-
-        </div>
-    )
+    );
 }
