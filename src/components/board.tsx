@@ -1,4 +1,3 @@
-
 // import { ChessQueen } from 'lucide-react';
 import { useState} from "react";
 
@@ -6,7 +5,32 @@ import { useState} from "react";
 
 export default function Board(){
 
+    const squares = [
+        ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
+        ["♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"],
+        ["",   "",  "",  "",  "",  "",  "", ""],
+        ["",   "",  "",  "",  "",  "",  "", ""],
+        ["",   "",  "",  "",  "",  "",  "", ""],
+        ["",   "",  "",  "",  "",  "",  "", ""],
+        ["♙", "♙", "♙", "♙", "♙", "♙", "♙", "♙"],
+        ["♖", "♘", "♗", "♕", "♔", "♗", "♘", "♖"],
+    ];
+
     const [pop, setPop] = useState(false);
+    const [square, setSquare]= useState(squares);
+    const [active,setActive] = useState<[number, number] | null>(null);
+    const [moves, setMoves] = useState<[number, number][]>([]);
+    const [promoSquare, setPromoSquare] = useState<[number, number] | null>(null);
+
+    // Track whether kings/rooks have moved, needed for castling legality
+    const [hasMoved, setHasMoved] = useState({
+        whiteKing: false,
+        whiteRookA: false,
+        whiteRookH: false,
+        blackKing: false,
+        blackRookA: false,
+        blackRookH: false,
+    });
 
     function playSound(){
         const sound = new Audio('/src/assets/sound/move.mp3');
@@ -32,21 +56,9 @@ export default function Board(){
     const [turn, setTurn] = useState(1);
     //1 for white
     //0 for black
-    const squares = [
-        ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
-        ["♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"],
-        ["",   "",  "",  "",  "",  "",  "", ""],
-        ["",   "",  "",  "",  "",  "",  "", ""],
-        ["",   "",  "",  "",  "",  "",  "", ""],
-        ["",   "",  "",  "",  "",  "",  "", ""],
-        ["♙", "♙", "♙", "♙", "♙", "♙", "♙", "♙"],
-        ["♖", "♘", "♗", "♕", "♔", "♗", "♘", "♖"],
-    ];
+  
 
-    const [square, setSquare]= useState(squares);
-    const [active,setActive] = useState<[number, number] | null>(null);
-    const [moves, setMoves] = useState<[number, number][]>([]);
-    const [promoSquare, setPromoSquare] = useState<[number, number] | null>(null);
+
 
     function handleClick(i : number, j : number, colour : number){
 
@@ -57,9 +69,40 @@ export default function Board(){
                 const [start, end] = active;
                 const movingPiece = square[start][end];
 
+                // Handle castling: king moving two squares sideways also moves the rook
+                if ((movingPiece === "♔" || movingPiece === "♚") && Math.abs(end - j) === 2) {
+                    if (j > end) {
+                        // kingside castle: rook from h-file to f-file
+                        square[i][j - 1] = square[start][7];
+                        square[start][7] = "";
+                    } else {
+                        // queenside castle: rook from a-file to d-file
+                        square[i][j + 1] = square[start][0];
+                        square[start][0] = "";
+                    }
+                }
+
                 square[i][j] = movingPiece;
                 square[start][end] = "";
                 setSquare(square);
+
+                // Update castling rights once a king or rook moves
+                if (movingPiece === "♔" || movingPiece === "♚" || movingPiece === "♖" || movingPiece === "♜") {
+                    setHasMoved(prev => {
+                        const updated = { ...prev };
+                        if (movingPiece === "♔") updated.whiteKing = true;
+                        if (movingPiece === "♚") updated.blackKing = true;
+                        if (movingPiece === "♖") {
+                            if (start === 7 && end === 0) updated.whiteRookA = true;
+                            if (start === 7 && end === 7) updated.whiteRookH = true;
+                        }
+                        if (movingPiece === "♜") {
+                            if (start === 0 && end === 0) updated.blackRookA = true;
+                            if (start === 0 && end === 7) updated.blackRookH = true;
+                        }
+                        return updated;
+                    });
+                }
 
                 setMoves([]);
                 setActive(null);
@@ -155,7 +198,7 @@ export default function Board(){
                 }
 
                 setMoves(num);
-            }       else if(square[i][j] == "♘"){
+            }  else if(square[i][j] == "♘"){
                     let num: [number, number][] = [];
 
                     let moves = [
@@ -413,6 +456,51 @@ export default function Board(){
                     }
                 }
 
+                // Castling
+                if (square[i][j] === "♔" && !hasMoved.whiteKing) {
+                    // kingside
+                    if (
+                        !hasMoved.whiteRookH &&
+                        square[i][5] === "" &&
+                        square[i][6] === "" &&
+                        square[i][7] === "♖"
+                    ) {
+                        num.push([i, 6]);
+                    }
+                    // queenside
+                    if (
+                        !hasMoved.whiteRookA &&
+                        square[i][1] === "" &&
+                        square[i][2] === "" &&
+                        square[i][3] === "" &&
+                        square[i][0] === "♖"
+                    ) {
+                        num.push([i, 2]);
+                    }
+                }
+
+                if (square[i][j] === "♚" && !hasMoved.blackKing) {
+                    // kingside
+                    if (
+                        !hasMoved.blackRookH &&
+                        square[i][5] === "" &&
+                        square[i][6] === "" &&
+                        square[i][7] === "♜"
+                    ) {
+                        num.push([i, 6]);
+                    }
+                    // queenside
+                    if (
+                        !hasMoved.blackRookA &&
+                        square[i][1] === "" &&
+                        square[i][2] === "" &&
+                        square[i][3] === "" &&
+                        square[i][0] === "♜"
+                    ) {
+                        num.push([i, 2]);
+                    }
+                }
+
                 setMoves(num);
             }
         }
@@ -444,7 +532,7 @@ export default function Board(){
                 </div>
             ))}
 
-            {pop && (
+             {pop && (
                 <div className="fixed inset-0 flex justify-center items-center">
                     <div className="border border-black backdrop-blur-sm flex flex-row">
                         <div onClick={() => choosePromotion("♘", "♞")} className="w-16 h-16 border border-black">♘</div>
