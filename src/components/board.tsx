@@ -512,11 +512,11 @@ export default function Board(){
         return ["♖","♘" ,"♗" ,"♕" ,"♔" ,"♙"].includes(piece) ? 1: 0;
     } 
     return (
-        <div>
-            <h2 className="text-2xl">Chess</h2>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <h2 className="text-2xl">Chess
 
             {square.map((_, i) => (
-                <div key={i} className="flex flex-row">
+                <div key={i} className="flex flex-row bg-white">
                     {square.map((_, j) => (
                         <div
                             key={`${i}-${j}`}
@@ -531,6 +531,7 @@ export default function Board(){
                     ))}
                 </div>
             ))}
+            </h2>
 
              {pop && (
                 <div className="fixed inset-0 flex justify-center items-center">
