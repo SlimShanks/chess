@@ -1,1 +1,7 @@
-@import 'tailwindcss'
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Spline+Sans+Mono:wght@400;500;600;700&display=swap');
+
+@theme {
+  --font-spline: "Spline Sans Mono", monospace;
+}

@@ -1,4 +1,3 @@
-
 // import { ChessQueen } from 'lucide-react';
 import { useState} from "react";
 
@@ -6,14 +5,6 @@ import { useState} from "react";
 
 export default function Board(){
 
-    function playSound(){
-        const sound = new Audio('/src/assets/sound/move.mp3');
-        sound.play();
-    }
-
-    const [turn, setTurn] = useState(1);
-    //1 for white
-    //0 for black
     const squares = [
         ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
         ["♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"],
@@ -25,28 +16,106 @@ export default function Board(){
         ["♖", "♘", "♗", "♕", "♔", "♗", "♘", "♖"],
     ];
 
+    const [pop, setPop] = useState(false);
     const [square, setSquare]= useState(squares);
     const [active,setActive] = useState<[number, number] | null>(null);
     const [moves, setMoves] = useState<[number, number][]>([]);
+    const [promoSquare, setPromoSquare] = useState<[number, number] | null>(null);
+
+    // Track whether kings/rooks have moved, needed for castling legality
+    const [hasMoved, setHasMoved] = useState({
+        whiteKing: false,
+        whiteRookA: false,
+        whiteRookH: false,
+        blackKing: false,
+        blackRookA: false,
+        blackRookH: false,
+    });
+
+    function playSound(){
+        const sound = new Audio('/src/assets/sound/move.mp3');
+        sound.play();
+    }
+
+    function choosePromotion(pieceWhite: string, pieceBlack: string) {
+        if (!promoSquare) return;
+        const [i, j] = promoSquare;
+
+        const moverWasWhite = square[i][j] === "♙";
+        const chosenPiece = moverWasWhite ? pieceWhite : pieceBlack;
+
+        square[i][j] = chosenPiece;
+        setSquare(square);
+
+        setPop(false);
+        setPromoSquare(null);
+        setTurn(turn === 1 ? 0 : 1);
+    }
+
+
+    const [turn, setTurn] = useState(1);
+    //1 for white
+    //0 for black
+  
+
+
 
     function handleClick(i : number, j : number, colour : number){
 
                     // We already have a selected piece
         if (active && moves.length > 0) {
-
-            // Is this square a valid destination?
             if (moves.some(([x, y]) => x === i && y === j)) {
                 playSound();
-                let start = active[0];
-                let end = active[1];
+                const [start, end] = active;
+                const movingPiece = square[start][end];
 
-                square[i][j] = square[start][end];
+                // Handle castling: king moving two squares sideways also moves the rook
+                if ((movingPiece === "♔" || movingPiece === "♚") && Math.abs(end - j) === 2) {
+                    if (j > end) {
+                        // kingside castle: rook from h-file to f-file
+                        square[i][j - 1] = square[start][7];
+                        square[start][7] = "";
+                    } else {
+                        // queenside castle: rook from a-file to d-file
+                        square[i][j + 1] = square[start][0];
+                        square[start][0] = "";
+                    }
+                }
+
+                square[i][j] = movingPiece;
                 square[start][end] = "";
-
                 setSquare(square);
+
+                // Update castling rights once a king or rook moves
+                if (movingPiece === "♔" || movingPiece === "♚" || movingPiece === "♖" || movingPiece === "♜") {
+                    setHasMoved(prev => {
+                        const updated = { ...prev };
+                        if (movingPiece === "♔") updated.whiteKing = true;
+                        if (movingPiece === "♚") updated.blackKing = true;
+                        if (movingPiece === "♖") {
+                            if (start === 7 && end === 0) updated.whiteRookA = true;
+                            if (start === 7 && end === 7) updated.whiteRookH = true;
+                        }
+                        if (movingPiece === "♜") {
+                            if (start === 0 && end === 0) updated.blackRookA = true;
+                            if (start === 0 && end === 7) updated.blackRookH = true;
+                        }
+                        return updated;
+                    });
+                }
 
                 setMoves([]);
                 setActive(null);
+
+                const isPromotion =
+                    (movingPiece === "♙" && i === 0) ||
+                    (movingPiece === "♟" && i === 7);
+
+                if (isPromotion) {
+                    setPromoSquare([i, j]);
+                    setPop(true);
+                    return; // don't switch turn yet
+                }
 
                 setTurn(turn === 1 ? 0 : 1);
                 return;
@@ -129,7 +198,7 @@ export default function Board(){
                 }
 
                 setMoves(num);
-            }    else if(square[i][j] == "♘"){
+            }  else if(square[i][j] == "♘"){
                     let num: [number, number][] = [];
 
                     let moves = [
@@ -387,6 +456,51 @@ export default function Board(){
                     }
                 }
 
+                // Castling
+                if (square[i][j] === "♔" && !hasMoved.whiteKing) {
+                    // kingside
+                    if (
+                        !hasMoved.whiteRookH &&
+                        square[i][5] === "" &&
+                        square[i][6] === "" &&
+                        square[i][7] === "♖"
+                    ) {
+                        num.push([i, 6]);
+                    }
+                    // queenside
+                    if (
+                        !hasMoved.whiteRookA &&
+                        square[i][1] === "" &&
+                        square[i][2] === "" &&
+                        square[i][3] === "" &&
+                        square[i][0] === "♖"
+                    ) {
+                        num.push([i, 2]);
+                    }
+                }
+
+                if (square[i][j] === "♚" && !hasMoved.blackKing) {
+                    // kingside
+                    if (
+                        !hasMoved.blackRookH &&
+                        square[i][5] === "" &&
+                        square[i][6] === "" &&
+                        square[i][7] === "♜"
+                    ) {
+                        num.push([i, 6]);
+                    }
+                    // queenside
+                    if (
+                        !hasMoved.blackRookA &&
+                        square[i][1] === "" &&
+                        square[i][2] === "" &&
+                        square[i][3] === "" &&
+                        square[i][0] === "♜"
+                    ) {
+                        num.push([i, 2]);
+                    }
+                }
+
                 setMoves(num);
             }
         }
@@ -397,26 +511,38 @@ export default function Board(){
     function isWhite(piece : string){
         return ["♖","♘" ,"♗" ,"♕" ,"♔" ,"♙"].includes(piece) ? 1: 0;
     } 
-    return(
-        <div>
+    return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
             <h2 className="text-2xl">
-                Chess
-            </h2>
-        
-            {square.map((_,i) => (
-                <div key={i} className=" flex flex-row">{square.map((_,j) => (
-                    <div key = {`${i}-${j}`} 
-                        onClick={()=>handleClick(i,j, isWhite(square[i][j]))} 
-                        className= {`${active && active[0] == i && active[1] == j  ? "bg-purple-600" : ""} 
-                                    ${active &&  moves.some(([x, y]) => x === i && y === j) ? "bg-purple-600" : ""}
-                                    ${(i+j)%2 != 0 ? "bg-green-300" : ""} 
-                                    border border-black h-16 w-16`}>
-                        {square[i][j]}
-                    </div>
-                ))}
+
+            {square.map((_, i) => (
+                <div key={i} className="flex flex-row bg-white">
+                    {square.map((_, j) => (
+                        <div
+                            key={`${i}-${j}`}
+                            onClick={() => handleClick(i, j, isWhite(square[i][j]))}
+                            className={`${active && active[0] === i && active[1] === j ? "bg-purple-600" : ""} 
+                                        ${moves.some(([x, y]) => x === i && y === j) ? "bg-purple-600" : ""}
+                                        ${(i + j) % 2 !== 0 ? "bg-green-300" : ""} 
+                                        border border-black h-16 w-16`}
+                        >
+                            {square[i][j]}
+                        </div>
+                    ))}
                 </div>
             ))}
+            </h2>
 
+             {pop && (
+                <div className="fixed inset-0 flex justify-center items-center">
+                    <div className="border border-black backdrop-blur-sm flex flex-row">
+                        <div onClick={() => choosePromotion("♘", "♞")} className="w-16 h-16 border border-black">♘</div>
+                        <div onClick={() => choosePromotion("♗", "♝")} className="w-16 h-16 border border-black">♗</div>
+                        <div onClick={() => choosePromotion("♕", "♛")} className="w-16 h-16 border border-black">♕</div>
+                        <div onClick={() => choosePromotion("♖", "♜")} className="w-16 h-16 border border-black">♖</div>
+                    </div>
+                </div>
+            )}
         </div>
-    )
+    );
 }
