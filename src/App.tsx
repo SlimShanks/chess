@@ -7,7 +7,12 @@ export default function App(){
 
   if(page == "chess"){
     return (
-      <Board/>
+      <div>
+        <div className="font-spline bg-black text-white flex ">
+          <button onClick = {() => setPage("home")} className="m-3 border border-white p-2 corner rounded-xl transition transform hover:scale-105 active:scale-90 active:bg-white active:text-black">Back</button>
+        </div>        
+        <Board/>
+      </div>
     )
   }
     return(

@@ -513,7 +513,7 @@ export default function Board(){
     } 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center">
-            <h2 className="text-2xl">Chess
+            <h2 className="text-2xl">
 
             {square.map((_, i) => (
                 <div key={i} className="flex flex-row bg-white">
