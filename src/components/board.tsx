@@ -57,6 +57,200 @@ export default function Board(){
     //1 for white
     //0 for black
   
+    function whitePawn(i : number, j : number){
+        let num: [number, number][] = [];
+                if(i == 6){
+                    for(let val =1; val <= 2; val++){
+                        let temp = i-val;
+                        if(square[i-val][j] == ""){
+                            num.push([temp,j]);   
+                        }else{
+                            break;
+                        }
+                    }
+                    return num;
+                }else{
+                    let temp = i-1;
+                    if(square[i-1][j] == ""){
+                        num.push([temp,j]);
+                    }
+
+                    if(square[i-1][j+1] != "" && 1 != isWhite(square[i-1][j+1])){
+                            num.push([temp,j+1]);   
+                    }
+
+                    if(square[i-1][j-1] != "" && 1 != isWhite(square[i-1][j-1])){
+                            num.push([temp,j-1]);   
+                    }
+                    
+                    return num;
+                }
+    }
+
+    function blackPawn(i : number, j : number){
+        let num: [number, number][] = [];
+
+                // Forward movement
+                if(i + 1 < 8 && square[i+1][j] == ""){
+                    num.push([i+1, j]);
+
+                    // Two-square initial move
+                    if(i == 1 && square[i+2][j] == ""){
+                        num.push([i+2, j]);
+                    }
+                }
+
+                // Capture right
+                if(i + 1 < 8 &&
+                j + 1 < 8 &&
+                square[i+1][j+1] != "" &&
+                isWhite(square[i+1][j+1]) == 1){
+                    num.push([i+1, j+1]);
+                }
+
+                // Capture left
+                if(i + 1 < 8 &&
+                j - 1 >= 0 &&
+                square[i+1][j-1] != "" &&
+                isWhite(square[i+1][j-1]) == 1){
+
+                    num.push([i+1, j-1]);
+                }
+
+                return num;
+    }
+
+    function knight(i : number, j : number){
+        let num: [number, number][] = [];
+
+                    let moves = [
+                        [-2, 1], [-2, -1],
+                        [2, 1],  [2, -1],
+                        [-1, 2], [-1, -2],
+                        [1, 2],  [1, -2]
+                    ];
+
+                    for(let [di, dj] of moves){
+                        let ni = i + di;
+                        let nj = j + dj;
+
+                        if(ni >= 0 && ni < 8 && nj >= 0 && nj < 8){
+                            if (turn == 1){
+                                if(square[ni][nj] == "" || isWhite(square[ni][nj]) != 1){
+                                num.push([ni, nj]);
+                                }
+                            }else{
+                                 // Empty square OR white piece
+                                if(square[ni][nj] == "" || isWhite(square[ni][nj]) == 1){
+                                    num.push([ni, nj]);
+                                }
+                            }
+                        }
+                    }
+
+                    return num;
+    }
+
+    function rook(i : number, j : number){
+        let num :[number,number][] = [];
+
+                let x = i+1;
+                let y = j+1;
+
+                while(x < 8){
+                    if(square[x][j] != "") {
+                        if(turn != isWhite(square[x][j])) num.push([x,j]);
+                        break;
+                    }
+                    num.push([x,j]);
+                    x++;
+                }
+                
+                x = i-1;
+                while(x >= 0){
+                    if(square[x][j] != "") {
+                        if(turn != isWhite(square[x][j])) num.push([x,j]);
+                        break;
+                    }
+                    num.push([x,j]);
+                    x--;
+                }
+
+                while(y < 8){
+                    if(square[i][y] != "") {
+                        if(turn != isWhite(square[i][y])) num.push([i,y]);
+                        break;}
+                    num.push([i,y]);
+                    y++;
+                }
+
+                y = j-1;
+                while(y >= 0 ){
+                    if(square[i][y] != "") {
+                        if(turn != isWhite(square[i][y])) num.push([i,y]);
+                        break;
+                    }
+                    num.push([i,y]);
+                    y--;
+                }
+
+                return num;
+    }
+
+    function bishop(i : number, j: number){
+        let num :[number,number][] = [];
+
+                let x = i+1;
+                let y = j+1;
+
+                while(x < 8 && y<8){
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
+                    num.push([x,y])
+                    x++;
+                    y++;
+                }
+                
+                x = i+1;
+                y = j-1;
+                while(x < 8 && y>=0){
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
+                    num.push([x,y])
+                    x++;
+                    y--;
+                }
+
+                x = i-1;
+                y = j+1;
+                while(x >= 0 && y<8){
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
+                    num.push([x,y])
+                    x--;
+                    y++;
+                }
+
+                x = i-1;
+                y = j-1;
+                while(x >= 0 && y>=0){
+                    if(square[x][y] != "") {
+                        if(turn != isWhite(square[x][y])) num.push([x,y]);
+                        break;
+                    }
+                    num.push([x,y])
+                    x--;
+                    y--;
+                }
+
+                return num;
+    }
 
 
 
@@ -139,301 +333,17 @@ export default function Board(){
 
 
             if(square[i][j] == "♙"){
-                let num: [number, number][] = [];
-                if(i == 6){
-                    for(let val =1; val <= 2; val++){
-                        let temp = i-val;
-                        if(square[i-val][j] == ""){
-                            num.push([temp,j]);   
-                        }else{
-                            break;
-                        }
-                    }
-                    setMoves(num)
-                }else{
-                    let temp = i-1;
-                    if(square[i-1][j] == ""){
-                        num.push([temp,j]);
-                    }
-
-                    if(square[i-1][j+1] != "" && 1 != isWhite(square[i-1][j+1])){
-                            num.push([temp,j+1]);   
-                    }
-
-                    if(square[i-1][j-1] != "" && 1 != isWhite(square[i-1][j-1])){
-                            num.push([temp,j-1]);   
-                    }
-                    
-                    setMoves(num)
-                }
-                
+                setMoves(whitePawn(i,j))
             }else if(square[i][j] == "♟"){
-                let num: [number, number][] = [];
-
-                // Forward movement
-                if(i + 1 < 8 && square[i+1][j] == ""){
-                    num.push([i+1, j]);
-
-                    // Two-square initial move
-                    if(i == 1 && square[i+2][j] == ""){
-                        num.push([i+2, j]);
-                    }
-                }
-
-                // Capture right
-                if(i + 1 < 8 &&
-                j + 1 < 8 &&
-                square[i+1][j+1] != "" &&
-                isWhite(square[i+1][j+1]) == 1){
-                    num.push([i+1, j+1]);
-                }
-
-                // Capture left
-                if(i + 1 < 8 &&
-                j - 1 >= 0 &&
-                square[i+1][j-1] != "" &&
-                isWhite(square[i+1][j-1]) == 1){
-
-                    num.push([i+1, j-1]);
-                }
-
-                setMoves(num);
-            }  else if(square[i][j] == "♘"){
-                    let num: [number, number][] = [];
-
-                    let moves = [
-                        [-2, 1], [-2, -1],
-                        [2, 1],  [2, -1],
-                        [-1, 2], [-1, -2],
-                        [1, 2],  [1, -2]
-                    ];
-
-                    for(let [di, dj] of moves){
-                        let ni = i + di;
-                        let nj = j + dj;
-
-                        if(ni >= 0 && ni < 8 && nj >= 0 && nj < 8){
-                            if(square[ni][nj] == "" || isWhite(square[ni][nj]) != 1){
-                                num.push([ni, nj]);
-                            }
-                        }
-                    }
-
-                    setMoves(num);
-                }else if(square[i][j] == "♞"){
-                    let num: [number, number][] = [];
-
-                    let moves = [
-                        [-2, 1], [-2, -1],
-                        [2, 1],  [2, -1],
-                        [-1, 2], [-1, -2],
-                        [1, 2],  [1, -2]
-                    ];
-
-                    for(let [di, dj] of moves){
-                        let ni = i + di;
-                        let nj = j + dj;
-
-                        if(ni >= 0 && ni < 8 && nj >= 0 && nj < 8){
-
-                            // Empty square OR white piece
-                            if(square[ni][nj] == "" || isWhite(square[ni][nj]) == 1){
-                                num.push([ni, nj]);
-                            }
-                        }
-                    }
-
-                    setMoves(num);
-                }else if(square[i][j] == "♜" || square[i][j] == "♖"){
-                let num :[number,number][] = [];
-
-                let x = i+1;
-                let y = j+1;
-
-                while(x < 8){
-                    if(square[x][j] != "") {
-                        if(turn != isWhite(square[x][j])) num.push([x,j]);
-                        break;
-                    }
-                    num.push([x,j]);
-                    x++;
-                }
-                
-                x = i-1;
-                while(x >= 0){
-                    if(square[x][j] != "") {
-                        if(turn != isWhite(square[x][j])) num.push([x,j]);
-                        break;
-                    }
-                    num.push([x,j]);
-                    x--;
-                }
-
-                while(y < 8){
-                    if(square[i][y] != "") {
-                        if(turn != isWhite(square[i][y])) num.push([i,y]);
-                        break;}
-                    num.push([i,y]);
-                    y++;
-                }
-
-                y = j-1;
-                while(y >= 0 ){
-                    if(square[i][y] != "") {
-                        if(turn != isWhite(square[i][y])) num.push([i,y]);
-                        break;
-                    }
-                    num.push([i,y]);
-                    y--;
-                }
-
-                setMoves(num);
+                setMoves(blackPawn(i,j))
+            }  else if(square[i][j] == "♘" || square[i][j] == "♞"){
+                setMoves(knight(i,j));
+            }else if(square[i][j] == "♜" || square[i][j] == "♖"){
+                setMoves(rook(i,j));
             }else if(square[i][j] == "♝" || square[i][j] =="♗"){
-                let num :[number,number][] = [];
-
-                let x = i+1;
-                let y = j+1;
-
-                while(x < 8 && y<8){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x++;
-                    y++;
-                }
-                
-                x = i+1;
-                y = j-1;
-                while(x < 8 && y>=0){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x++;
-                    y--;
-                }
-
-                x = i-1;
-                y = j+1;
-                while(x >= 0 && y<8){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x--;
-                    y++;
-                }
-
-                x = i-1;
-                y = j-1;
-                while(x >= 0 && y>=0){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x--;
-                    y--;
-                }
-
-                setMoves(num);
+                setMoves(bishop(i,j));
             }else if(square[i][j] == "♛" || square[i][j] =="♕"){
-                let num :[number,number][] = [];
-
-                let x = i+1;
-                let y = j+1;
-
-                while(x < 8){
-                    if(square[x][j] != "") {
-                        if(turn != isWhite(square[x][j])) num.push([x,j]);
-                        break;
-                    }
-                    num.push([x,j]);
-                    x++;
-                }
-                
-                x = i-1;
-                while(x >= 0){
-                    if(square[x][j] != "") {
-                        if(turn != isWhite(square[x][j])) num.push([x,j]);
-                        break;
-                    }
-                    num.push([x,j]);
-                    x--;
-                }
-
-                while(y < 8){
-                    if(square[i][y] != "") {
-                        if(turn != isWhite(square[i][y])) num.push([i,y]);
-                        break;}
-                    num.push([i,y]);
-                    y++;
-                }
-
-                y = j-1;
-                while(y >= 0 ){
-                    if(square[i][y] != "") {
-                        if(turn != isWhite(square[i][y])) num.push([i,y]);
-                        break;
-                    }
-                    num.push([i,y]);
-                    y--;
-                }
-
-                x = i+1;
-                y = j+1;
-
-                while(x < 8 && y<8){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x++;
-                    y++;
-                }
-                
-                x = i+1;
-                y = j-1;
-                while(x < 8 && y>=0){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x++;
-                    y--;
-                }
-
-                x = i-1;
-                y = j+1;
-                while(x >= 0 && y<8){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x--;
-                    y++;
-                }
-
-                x = i-1;
-                y = j-1;
-                while(x >= 0 && y>=0){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x--;
-                    y--;
-                }
-
-                setMoves(num);
+                setMoves([...bishop(i, j), ...rook(i, j)]);
             }else if(square[i][j] == "♔" || square[i][j] =="♚"){
                 const directions = [
                     [-1, -1], [-1, 0], [-1, 1],
