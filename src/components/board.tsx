@@ -21,6 +21,8 @@ export default function Board(){
     const [active,setActive] = useState<[number, number] | null>(null);
     const [moves, setMoves] = useState<[number, number][]>([]);
     const [promoSquare, setPromoSquare] = useState<[number, number] | null>(null);
+    const [blackKing, setBlackKing] = useState<[number,number]>([0,4]);
+    const [whiteKing, setWhiteKing] = useState<[number,number]>([7,4]);
 
     // Track whether kings/rooks have moved, needed for castling legality
     const [hasMoved, setHasMoved] = useState({
@@ -50,6 +52,209 @@ export default function Board(){
         setPop(false);
         setPromoSquare(null);
         setTurn(turn === 1 ? 0 : 1);
+    }
+
+    function isCheck() {
+        let x: number;
+        let y: number;
+
+        // Find current player's king
+        if (turn == 1) {
+            x = whiteKing[0];
+            y = whiteKing[1];
+        } else {
+            x = blackKing[0];
+            y = blackKing[1];
+        }
+
+        // =========================================
+        // 1. ROOK / QUEEN — horizontal + vertical
+        // =========================================
+
+        const straightDirections: [number, number][] = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ];
+
+        for (const [dx, dy] of straightDirections) {
+
+            let i = x + dx;
+            let j = y + dy;
+
+            while (i >= 0 && i < 8 && j >= 0 && j < 8) {
+
+                if (square[i][j] != "") {
+
+                    if (turn == 1) {
+                        // White king -> attacked by black rook/queen
+                        if (square[i][j] == "♜" || square[i][j] == "♛") {
+                            return true;
+                        }
+                    } else {
+                        // Black king -> attacked by white rook/queen
+                        if (square[i][j] == "♖" || square[i][j] == "♕") {
+                            return true;
+                        }
+                    }
+
+                    // Any piece blocks the ray
+                    break;
+                }
+
+                i += dx;
+                j += dy;
+            }
+        }
+
+
+        // =========================================
+        // 2. BISHOP / QUEEN — diagonals
+        // =========================================
+
+        const diagonalDirections: [number, number][] = [
+            [1, 1],
+            [1, -1],
+            [-1, 1],
+            [-1, -1]
+        ];
+
+        for (const [dx, dy] of diagonalDirections) {
+
+            let i = x + dx;
+            let j = y + dy;
+
+            while (i >= 0 && i < 8 && j >= 0 && j < 8) {
+
+                if (square[i][j] != "") {
+
+                    if (turn == 1) {
+                        // White king -> attacked by black bishop/queen
+                        if (square[i][j] == "♝" || square[i][j] == "♛") {
+                            return true;
+                        }
+                    } else {
+                        // Black king -> attacked by white bishop/queen
+                        if (square[i][j] == "♗" || square[i][j] == "♕") {
+                            return true;
+                        }
+                    }
+
+                    // Any piece blocks the ray
+                    break;
+                }
+
+                i += dx;
+                j += dy;
+            }
+        }
+
+
+        // =========================================
+        // 3. KNIGHT
+        // =========================================
+
+        const knightMoves: [number, number][] = [
+            [-2, 1],
+            [-2, -1],
+            [2, 1],
+            [2, -1],
+            [-1, 2],
+            [-1, -2],
+            [1, 2],
+            [1, -2]
+        ];
+
+        for (const [dx, dy] of knightMoves) {
+
+            const i = x + dx;
+            const j = y + dy;
+
+            if (i >= 0 && i < 8 && j >= 0 && j < 8) {
+
+                if (turn == 1 && square[i][j] == "♞") {
+                    return true;
+                }
+
+                if (turn == 0 && square[i][j] == "♘") {
+                    return true;
+                }
+            }
+        }
+
+
+        // =========================================
+        // 4. ENEMY KING
+        // =========================================
+
+        for (let dx = -1; dx <= 1; dx++) {
+
+            for (let dy = -1; dy <= 1; dy++) {
+
+                if (dx == 0 && dy == 0) {
+                    continue;
+                }
+
+                const i = x + dx;
+                const j = y + dy;
+
+                if (i >= 0 && i < 8 && j >= 0 && j < 8) {
+
+                    if (turn == 1 && square[i][j] == "♚") {
+                        return true;
+                    }
+
+                    if (turn == 0 && square[i][j] == "♔") {
+                        return true;
+                    }
+                }
+            }
+        }
+
+
+        // =========================================
+        // 5. ENEMY PAWN
+        // =========================================
+
+        if (turn == 1) {
+
+            // White king is attacked by black pawns.
+            // Black pawns move +i, so they must be at x-1.
+            const i = x - 1;
+
+            if (i >= 0) {
+
+                if (y - 1 >= 0 && square[i][y - 1] == "♟") {
+                    return true;
+                }
+
+                if (y + 1 < 8 && square[i][y + 1] == "♟") {
+                    return true;
+                }
+            }
+
+        } else {
+
+            // Black king is attacked by white pawns.
+            // White pawns move -i, so they must be at x+1.
+            const i = x + 1;
+
+            if (i < 8) {
+
+                if (y - 1 >= 0 && square[i][y - 1] == "♙") {
+                    return true;
+                }
+
+                if (y + 1 < 8 && square[i][y + 1] == "♙") {
+                    return true;
+                }
+            }
+        }
+
+
+        // No enemy piece attacks the king
+        return false;
     }
 
 
@@ -151,111 +356,82 @@ export default function Board(){
                     return num;
     }
 
-    function rook(i : number, j : number){
-        let num :[number,number][] = [];
+    function rook(i: number, j: number) {
+        const moves: [number, number][] = [];
 
-                let x = i+1;
-                let y = j+1;
+        const directions: [number, number][] = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ];
 
-                while(x < 8){
-                    if(square[x][j] != "") {
-                        if(turn != isWhite(square[x][j])) num.push([x,j]);
-                        break;
+        for (const [dx, dy] of directions) {
+            let x = i + dx;
+            let y = j + dy;
+
+            while (x >= 0 && x < 8 && y >= 0 && y < 8) {
+
+                if (square[x][y] !== "") {
+                    if (turn !== isWhite(square[x][y])) {
+                        moves.push([x, y]);
                     }
-                    num.push([x,j]);
-                    x++;
-                }
-                
-                x = i-1;
-                while(x >= 0){
-                    if(square[x][j] != "") {
-                        if(turn != isWhite(square[x][j])) num.push([x,j]);
-                        break;
-                    }
-                    num.push([x,j]);
-                    x--;
+
+                    break;
                 }
 
-                while(y < 8){
-                    if(square[i][y] != "") {
-                        if(turn != isWhite(square[i][y])) num.push([i,y]);
-                        break;}
-                    num.push([i,y]);
-                    y++;
-                }
+                moves.push([x, y]);
 
-                y = j-1;
-                while(y >= 0 ){
-                    if(square[i][y] != "") {
-                        if(turn != isWhite(square[i][y])) num.push([i,y]);
-                        break;
-                    }
-                    num.push([i,y]);
-                    y--;
-                }
+                x += dx;
+                y += dy;
+            }
+        }
 
-                return num;
+        return moves;
     }
 
-    function bishop(i : number, j: number){
-        let num :[number,number][] = [];
+    function bishop(i: number, j: number) {
+        const moves: [number, number][] = [];
 
-                let x = i+1;
-                let y = j+1;
+        const directions: [number, number][] = [
+            [1, 1],
+            [1, -1],
+            [-1, 1],
+            [-1, -1]
+        ];
 
-                while(x < 8 && y<8){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
+        for (const [dx, dy] of directions) {
+            let x = i + dx;
+            let y = j + dy;
+
+            while (x >= 0 && x < 8 && y >= 0 && y < 8) {
+
+                if (square[x][y] !== "") {
+                    if (turn !== isWhite(square[x][y])) {
+                        moves.push([x, y]);
                     }
-                    num.push([x,y])
-                    x++;
-                    y++;
-                }
-                
-                x = i+1;
-                y = j-1;
-                while(x < 8 && y>=0){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x++;
-                    y--;
+                    break;
                 }
 
-                x = i-1;
-                y = j+1;
-                while(x >= 0 && y<8){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x--;
-                    y++;
-                }
+                moves.push([x, y]);
 
-                x = i-1;
-                y = j-1;
-                while(x >= 0 && y>=0){
-                    if(square[x][y] != "") {
-                        if(turn != isWhite(square[x][y])) num.push([x,y]);
-                        break;
-                    }
-                    num.push([x,y])
-                    x--;
-                    y--;
-                }
+                x += dx;
+                y += dy;
+            }
+        }
 
-                return num;
+        return moves;
     }
+    const [popup, setPopup] = useState("");
+    function showPopup(message: string) {
+    setPopup(message);
 
-
+    setTimeout(() => {
+        setPopup("");
+    }, 2000);
+}
 
     function handleClick(i : number, j : number, colour : number){
-
                     // We already have a selected piece
         if (active && moves.length > 0) {
             if (moves.some(([x, y]) => x === i && y === j)) {
@@ -274,11 +450,23 @@ export default function Board(){
                         square[i][j + 1] = square[start][0];
                         square[start][0] = "";
                     }
+
                 }
 
+
                 square[i][j] = movingPiece;
+                console.log(i,j);
                 square[start][end] = "";
                 setSquare(square);
+
+                if (movingPiece === "♔" ){
+                    setWhiteKing([i,j]);
+                    console.log(whiteKing)
+                }else if(movingPiece === "♚"){
+                    setBlackKing([i,j])
+                    console.log(blackKing)
+                }
+
 
                 // Update castling rights once a king or rook moves
                 if (movingPiece === "♔" || movingPiece === "♚" || movingPiece === "♖" || movingPiece === "♜") {
@@ -297,7 +485,10 @@ export default function Board(){
                         return updated;
                     });
                 }
-
+                
+                if (isCheck()) {
+                    showPopup("Check!");
+                }
                 setMoves([]);
                 setActive(null);
 
@@ -451,6 +642,13 @@ export default function Board(){
                         <div onClick={() => choosePromotion("♕", "♛")} className="w-16 h-16 border border-black">♕</div>
                         <div onClick={() => choosePromotion("♖", "♜")} className="w-16 h-16 border border-black">♖</div>
                     </div>
+                </div>
+            )}
+
+            {popup && (
+                <div className="fixed top-5 left-1/2 -translate-x-1/2 
+                                bg-black text-white px-4 py-2 rounded-lg">
+                    {popup}
                 </div>
             )}
         </div>
